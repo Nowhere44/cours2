@@ -119,7 +119,7 @@ app.get("/api/critiques", (req, res) => {
       auteur: auteurCritique ? auteurCritique.pseudo : "Auteur inconnu",
     };
   });
-
+  console.log("test");
   res.json(critiquesAvecAuteur);
 });
 
