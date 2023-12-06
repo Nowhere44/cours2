@@ -148,7 +148,7 @@ app.post("/api/critiques", authenticateJWT, (req, res) => {
     likes: 0,
     comments: 0,
   };
-
+  console.log(nouvelleCritique);
   critiques.push(nouvelleCritique);
   res.status(201).json(nouvelleCritique);
 });
