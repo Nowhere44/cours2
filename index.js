@@ -75,6 +75,20 @@ let critiques = [
     comments: 5,
   },
 ];
+//Endpoint de Connexion des Fans
+app.post("/api/fans/login", (req, res) => {
+  const { pseudo } = req.body;
+
+  const fan = utilisateurs.find((f) => f.pseudo === pseudo);
+  if (!fan) {
+    return res.status(404).json({ message: "Fan non trouvé" });
+  }
+
+  const token = jwt.sign({ id: fan.id, pseudo: fan.pseudo }, SECRET_KEY, {
+    expiresIn: "12h",
+  });
+  res.json({ token });
+});
 //Endpoint de Liste des Critiques avec Filtrage JWT
 app.get("/api/critiques", (req, res) => {
   const { titre, auteur } = req.query;
