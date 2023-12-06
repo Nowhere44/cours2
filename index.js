@@ -75,22 +75,41 @@ let critiques = [
     comments: 5,
   },
 ];
+//Endpoint de Liste des Critiques avec Filtrage JWT
+app.get("/api/critiques", (req, res) => {
+  const { titre, auteur } = req.query;
+  let resultats = critiques;
+
+  if (titre) {
+    resultats = resultats.filter((c) =>
+      c.titre.toLowerCase().includes(titre.toLowerCase())
+    );
+  }
+
+  if (auteur) {
+    resultats = resultats.filter((c) => {
+      const auteurCritique = utilisateurs.find((u) => u.id === c.auteurId);
+      return (
+        auteurCritique &&
+        auteurCritique.pseudo.toLowerCase().includes(auteur.toLowerCase())
+      );
+    });
+  }
+
+  const critiquesAvecAuteur = resultats.map((c) => {
+    const auteurCritique = utilisateurs.find((u) => u.id === c.auteurId);
+    return {
+      id: c.id,
+      titre: c.titre,
+      critique: c.critique,
+      auteur: auteurCritique ? auteurCritique.pseudo : "Auteur inconnu",
+    };
+  });
+
+  res.json(critiquesAvecAuteur);
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Serveur démarré sur le port ${PORT}`);
-});
-//Endpoint de Connexion des Fans
-app.post("/api/fans/login", (req, res) => {
-  const { pseudo } = req.body;
-
-  const fan = utilisateurs.find((f) => f.pseudo === pseudo);
-  if (!fan) {
-    return res.status(404).json({ message: "Fan non trouvé" });
-  }
-
-  const token = jwt.sign({ id: fan.id, pseudo: fan.pseudo }, SECRET_KEY, {
-    expiresIn: "12h",
-  });
-  res.json({ token });
 });
