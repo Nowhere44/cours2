@@ -80,3 +80,17 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Serveur démarré sur le port ${PORT}`);
 });
+//Endpoint de Connexion des Fans
+app.post("/api/fans/login", (req, res) => {
+  const { pseudo } = req.body;
+
+  const fan = utilisateurs.find((f) => f.pseudo === pseudo);
+  if (!fan) {
+    return res.status(404).json({ message: "Fan non trouvé" });
+  }
+
+  const token = jwt.sign({ id: fan.id, pseudo: fan.pseudo }, SECRET_KEY, {
+    expiresIn: "12h",
+  });
+  res.json({ token });
+});
