@@ -9,6 +9,8 @@ const publicRoutes = [
 ];
 const SECRET_KEY = "VGYGVygdygy5667";
 
+console.log("test");
+
 let utilisateurs = [
   {
     id: 1,
@@ -74,6 +76,7 @@ let critiques = [
   },
 ];
 
+
 const authenticateJWT = (req, res, next) => {
   const authHeader = req.headers.authorization;
   const token = authHeader && authHeader.split(" ")[1];
@@ -125,6 +128,21 @@ app.post("/api/fans/signup", (req, res) => {
 
   utilisateurs.push(nouveauUtilisateur);
   res.status(201).json(nouveauUtilisateur);
+});
+
+//Endpoint de Connexion des Fans
+app.post("/api/fans/login", (req, res) => {
+  const { pseudo } = req.body;
+
+  const fan = utilisateurs.find((f) => f.pseudo === pseudo);
+  if (!fan) {
+    return res.status(404).json({ message: "Fan non trouvé" });
+  }
+
+  const token = jwt.sign({ id: fan.id, pseudo: fan.pseudo }, SECRET_KEY, {
+    expiresIn: "12h",
+  });
+  res.json({ token });
 });
 
 //Endpoint de Publication de Critiques avec Comptage de Mots - JWT
