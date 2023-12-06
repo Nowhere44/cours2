@@ -130,7 +130,6 @@ app.post("/api/fans/signup", (req, res) => {
   res.status(201).json(nouveauUtilisateur);
 });
 
-
 //Endpoint de Connexion des Fans
 app.post("/api/fans/login", (req, res) => {
   const { pseudo } = req.body;
@@ -146,40 +145,31 @@ app.post("/api/fans/login", (req, res) => {
   res.json({ token });
 });
 
-//Endpoint de Liste des Critiques avec Filtrage JWT
-app.get("/api/critiques", (req, res) => {
-  const { titre, auteur } = req.query;
-  let resultats = critiques;
+//Endpoint de Publication de Critiques avec Comptage de Mots - JWT
+app.post("/api/critiques", authenticateJWT, (req, res) => {
+  const { titre, critique } = req.body;
+  const auteurId = req.userId;
+  const wordCount = critique.split("").length;
 
-  if (titre) {
-    resultats = resultats.filter((c) =>
-      c.titre.toLowerCase().includes(titre.toLowerCase())
-    );
+  if (wordCount < 50 || wordCount > 500) {
+    return res
+      .status(400)
+      .json({ message: "La critique doit contenir entre 50 et 500 mots" });
   }
 
-  if (auteur) {
-    resultats = resultats.filter((c) => {
-      const auteurCritique = utilisateurs.find((u) => u.id === c.auteurId);
-      return (
-        auteurCritique &&
-        auteurCritique.pseudo.toLowerCase().includes(auteur.toLowerCase())
-      );
-    });
-  }
-
-  const critiquesAvecAuteur = resultats.map((c) => {
-    const auteurCritique = utilisateurs.find((u) => u.id === c.auteurId);
-    return {
-      id: c.id,
-      titre: c.titre,
-      critique: c.critique,
-      auteur: auteurCritique ? auteurCritique.pseudo : "Auteur inconnu",
-    };
-  });
-  console.log("test");
-  res.json(critiquesAvecAuteur);
+  const nouvelleCritique = {
+    id: critiques.length + 1,
+    titre,
+    critique,
+    auteurId,
+    date: new Date().toISOString(),
+    likes: 0,
+    comments: 0,
+  };
+  console.log(nouvelleCritique);
+  critiques.push(nouvelleCritique);
+  res.status(201).json(nouvelleCritique);
 });
-
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
