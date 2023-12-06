@@ -75,6 +75,62 @@ let critiques = [
     comments: 5,
   },
 ];
+
+
+const authenticateJWT = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(" ")[1];
+
+  console.log("Authorization Header:", authHeader);
+  console.log("Extracted Token:", token);
+
+  if (!token) {
+    return res.status(401).json({ error: "Authentification requise" });
+  }
+
+  jwt.verify(token, SECRET_KEY, (err, decoded) => {
+    if (err) {
+      return res.status(401).json({ error: "JWT invalide" });
+    }
+
+    req.userId = decoded.id;
+    console.log(req.userId);
+    next();
+  });
+};
+
+app.use((req, res, next) => {
+  if (!publicRoutes.includes(req.path)) {
+    authenticateJWT(req, res, next);
+  } else {
+    next();
+  }
+});
+
+app.use(express.json());
+
+//Endpoint d'Inscription des Fans avec Algorithme de Pseudo
+app.post("/api/fans/signup", (req, res) => {
+  const { nom, password } = req.body;
+  let pseudo;
+  let unique = false;
+
+  while (!unique) {
+    pseudo = `${nom}${Math.floor(Math.random() * 1000)}`;
+    unique = !utilisateurs.some((u) => u.pseudo === pseudo);
+  }
+
+  const nouveauUtilisateur = {
+    id: utilisateurs.length + 1,
+    pseudo,
+    password,
+  };
+
+  utilisateurs.push(nouveauUtilisateur);
+  res.status(201).json(nouveauUtilisateur);
+});
+
+
 //Endpoint de Connexion des Fans
 app.post("/api/fans/login", (req, res) => {
   const { pseudo } = req.body;
@@ -89,6 +145,7 @@ app.post("/api/fans/login", (req, res) => {
   });
   res.json({ token });
 });
+
 //Endpoint de Liste des Critiques avec Filtrage JWT
 app.get("/api/critiques", (req, res) => {
   const { titre, auteur } = req.query;
@@ -122,6 +179,7 @@ app.get("/api/critiques", (req, res) => {
   console.log("test");
   res.json(critiquesAvecAuteur);
 });
+
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
