@@ -9,6 +9,8 @@ const publicRoutes = [
 ];
 const SECRET_KEY = "VGYGVygdygy5667";
 
+console.log("test");
+
 let utilisateurs = [
   {
     id: 1,
