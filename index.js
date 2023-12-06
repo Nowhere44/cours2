@@ -127,6 +127,32 @@ app.post("/api/fans/signup", (req, res) => {
   res.status(201).json(nouveauUtilisateur);
 });
 
+//Endpoint de Publication de Critiques avec Comptage de Mots - JWT
+app.post("/api/critiques", authenticateJWT, (req, res) => {
+  const { titre, critique } = req.body;
+  const auteurId = req.userId;
+  const wordCount = critique.split("").length;
+
+  if (wordCount < 50 || wordCount > 500) {
+    return res
+      .status(400)
+      .json({ message: "La critique doit contenir entre 50 et 500 mots" });
+  }
+
+  const nouvelleCritique = {
+    id: critiques.length + 1,
+    titre,
+    critique,
+    auteurId,
+    date: new Date().toISOString(),
+    likes: 0,
+    comments: 0,
+  };
+
+  critiques.push(nouvelleCritique);
+  res.status(201).json(nouvelleCritique);
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Serveur démarré sur le port ${PORT}`);
