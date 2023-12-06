@@ -129,10 +129,6 @@ app.post("/api/fans/signup", (req, res) => {
   res.status(201).json(nouveauUtilisateur);
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Serveur démarré sur le port ${PORT}`);
-});
 //Endpoint de Connexion des Fans
 app.post("/api/fans/login", (req, res) => {
   const { pseudo } = req.body;
@@ -146,4 +142,9 @@ app.post("/api/fans/login", (req, res) => {
     expiresIn: "12h",
   });
   res.json({ token });
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Serveur démarré sur le port ${PORT}`);
 });
